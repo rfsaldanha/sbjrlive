@@ -254,6 +254,7 @@ server <- function(input, output, session) {
         providers$Esri.WorldImagery,
         group = "Imagem de satélite"
       ) |>
+      addProviderTiles(providers$OpenTopoMap, group = "Topografia") |>
       setView(center_lon, center_lat, zoom = 10) |>
       addCircles(
         lng = center_lon,
@@ -299,7 +300,7 @@ server <- function(input, output, session) {
         group = "Pontos de navegação",
       ) |>
       addLayersControl(
-        baseGroups = c("Ruas", "Imagem de satélite"),
+        baseGroups = c("Ruas", "Topografia", "Imagem de satélite"),
         overlayGroups = c(
           "SBRJ",
           "Pontos de navegação",
