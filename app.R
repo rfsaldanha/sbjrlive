@@ -182,6 +182,70 @@ server <- function(input, output, session) {
     iconAnchorY = 12
   )
 
+  a0_icon <- makeIcon(
+    iconUrl = "www/a0.svg",
+    iconWidth = 24,
+    iconHeight = 14,
+    iconAnchorX = 23,
+    iconAnchorY = 12
+  )
+
+  a1_icon <- makeIcon(
+    iconUrl = "www/a1.svg",
+    iconWidth = 24,
+    iconHeight = 14,
+    iconAnchorX = 23,
+    iconAnchorY = 12
+  )
+
+  a2_icon <- makeIcon(
+    iconUrl = "www/a2.svg",
+    iconWidth = 24,
+    iconHeight = 14,
+    iconAnchorX = 23,
+    iconAnchorY = 12
+  )
+
+  a3_icon <- makeIcon(
+    iconUrl = "www/a3.svg",
+    iconWidth = 24,
+    iconHeight = 14,
+    iconAnchorX = 23,
+    iconAnchorY = 12
+  )
+
+  a4_icon <- makeIcon(
+    iconUrl = "www/a4.svg",
+    iconWidth = 24,
+    iconHeight = 14,
+    iconAnchorX = 23,
+    iconAnchorY = 12
+  )
+
+  a5_icon <- makeIcon(
+    iconUrl = "www/a5.svg",
+    iconWidth = 24,
+    iconHeight = 14,
+    iconAnchorX = 23,
+    iconAnchorY = 12
+  )
+
+  a6_icon <- makeIcon(
+    iconUrl = "www/a6.svg",
+    iconWidth = 24,
+    iconHeight = 14,
+    iconAnchorX = 23,
+    iconAnchorY = 12
+  )
+
+  a7_icon <- makeIcon(
+    iconUrl = "www/a7.svg",
+    iconWidth = 24,
+    iconHeight = 14,
+    iconAnchorX = 23,
+    iconAnchorY = 12
+  )
+
   # Initialize the static map
   output$map <- renderLeaflet({
     leaflet() |>
@@ -211,36 +275,6 @@ server <- function(input, output, session) {
         label = "Espaço Aéreo do Pré-sal",
         group = "Espaço Aéreo do Pré-sal"
       ) |>
-      addLayersControl(
-        baseGroups = c("Ruas", "Imagem de satélite"),
-        overlayGroups = c(
-          "SBRJ",
-          "Pontos de navegação",
-          "Aeronaves",
-          "Espaço Aéreo do Pré-sal",
-          "Raio de busca"
-        ),
-        options = layersControlOptions(collapsed = FALSE) # Deixa o controle aberto
-      )
-  })
-
-  # Update map
-  observe({
-    # Refresh every 10000 milliseconds
-    invalidateLater(input$refresh_rate * 1000, session)
-
-    # Fetch data
-    res <- fetch_point(
-      provider = "adsb_lol",
-      lat = center_lat,
-      lon = center_lon,
-      radius = input$radius
-    )
-
-    # 3. Use proxy to update ONLY the markers
-    leafletProxy("map", data = res) |>
-      clearMarkers() |>
-      registerPlugin(rotatedMarker) |>
       addCircleMarkers(
         lng = center_lon,
         lat = center_lat,
@@ -264,40 +298,406 @@ server <- function(input, output, session) {
         label = ~nome,
         group = "Pontos de navegação",
       ) |>
-      addMarkers(
-        ~lon,
-        ~lat,
-        label = ~ lapply(
-          paste0(
-            "<div style='font-family: sans-serif; min-width: 150px;'>",
-            "<h5 style='margin: 0 0 5px 0; color: #2e2e2eff;'>",
-            ifelse(flight == "", "N/A", flight),
-            "</h5>",
-            "<hr style='margin: 5px 0;'>",
-            "<b>Código:</b> ",
-            r,
-            "<br>",
-            "<b>Aeronave:</b> ",
-            t,
-            "<br>",
-            "<b>Altitude:</b> ",
-            alt_baro,
-            " ft",
-            "<br>",
-            "<b>Velocidade (GS):</b> ",
-            gs,
-            " kt",
-            "</div>"
-          ),
-          htmltools::HTML
+      addLayersControl(
+        baseGroups = c("Ruas", "Imagem de satélite"),
+        overlayGroups = c(
+          "SBRJ",
+          "Pontos de navegação",
+          "Espaço Aéreo do Pré-sal",
+          "Raio de busca",
+          "Aeronaves A0",
+          "Aeronaves A1",
+          "Aeronaves A2",
+          "Aeronaves A3",
+          "Aeronaves A4",
+          "Aeronaves A5",
+          "Aeronaves A6",
+          "Aeronaves A7"
         ),
-        icon = arrow_icon,
-        options = markerOptions(
-          rotationAngle = ~track,
-          rotationOrigin = "center center"
-        ),
-        group = "Aeronaves"
+        options = layersControlOptions(collapsed = TRUE) # Deixa o controle aberto
       )
+  })
+
+  # Update map
+  observe({
+    # Refresh every 10000 milliseconds
+    invalidateLater(input$refresh_rate * 1000, session)
+
+    # Fetch data
+    res <- fetch_point(
+      provider = "adsb_lol",
+      lat = center_lat,
+      lon = center_lon,
+      radius = input$radius
+    )
+
+    a0 <- NULL
+    a1 <- NULL
+    a2 <- NULL
+    a3 <- NULL
+    a4 <- NULL
+    a5 <- NULL
+    a6 <- NULL
+    a7 <- NULL
+    if ("A0" %in% unique(res$category)) {
+      a0 <- subset(res, category == "A0")
+    }
+    if ("A1" %in% unique(res$category)) {
+      a1 <- subset(res, category == "A1")
+    }
+    if ("A2" %in% unique(res$category)) {
+      a2 <- subset(res, category == "A2")
+    }
+    if ("A3" %in% unique(res$category)) {
+      a3 <- subset(res, category == "A3")
+    }
+    if ("A4" %in% unique(res$category)) {
+      a4 <- subset(res, category == "A4")
+    }
+    if ("A5" %in% unique(res$category)) {
+      a5 <- subset(res, category == "A5")
+    }
+    if ("A6" %in% unique(res$category)) {
+      a6 <- subset(res, category == "A6")
+    }
+    if ("A7" %in% unique(res$category)) {
+      a7 <- subset(res, category == "A7")
+    }
+
+    # Use proxy to update ONLY the markers
+    map <- leafletProxy("map") |>
+      # clearMarkers() |>
+      clearGroup(group = "Aeronaves A0") |>
+      clearGroup(group = "Aeronaves A1") |>
+      clearGroup(group = "Aeronaves A2") |>
+      clearGroup(group = "Aeronaves A3") |>
+      clearGroup(group = "Aeronaves A4") |>
+      clearGroup(group = "Aeronaves A5") |>
+      clearGroup(group = "Aeronaves A6") |>
+      clearGroup(group = "Aeronaves A7") |>
+      registerPlugin(rotatedMarker)
+
+    # A0
+    if (!is.null(a0)) {
+      map <- map |>
+        addMarkers(
+          data = a0,
+          lng = ~lon,
+          lat = ~lat,
+          label = ~ lapply(
+            paste0(
+              "<div style='font-family: sans-serif; min-width: 150px;'>",
+              "<h5 style='margin: 0 0 5px 0; color: #2e2e2eff;'>",
+              ifelse(flight == "", "N/A", flight),
+              "</h5>",
+              "<hr style='margin: 5px 0;'>",
+              "<b>Código:</b> ",
+              r,
+              "<br>",
+              "<b>Aeronave:</b> ",
+              t,
+              "<br>",
+              "<b>Altitude:</b> ",
+              alt_baro,
+              " ft",
+              "<br>",
+              "<b>Velocidade (GS):</b> ",
+              gs,
+              " kt",
+              "</div>"
+            ),
+            htmltools::HTML
+          ),
+          icon = a0_icon,
+          options = markerOptions(
+            rotationAngle = ~track,
+            rotationOrigin = "center center"
+          ),
+          group = "Aeronaves A0"
+        )
+    }
+
+    # A1
+    if (!is.null(a1)) {
+      map <- map |>
+        addMarkers(
+          data = a1,
+          lng = ~lon,
+          lat = ~lat,
+          label = ~ lapply(
+            paste0(
+              "<div style='font-family: sans-serif; min-width: 150px;'>",
+              "<h5 style='margin: 0 0 5px 0; color: #2e2e2eff;'>",
+              ifelse(flight == "", "N/A", flight),
+              "</h5>",
+              "<hr style='margin: 5px 0;'>",
+              "<b>Código:</b> ",
+              r,
+              "<br>",
+              "<b>Aeronave:</b> ",
+              t,
+              "<br>",
+              "<b>Altitude:</b> ",
+              alt_baro,
+              " ft",
+              "<br>",
+              "<b>Velocidade (GS):</b> ",
+              gs,
+              " kt",
+              "</div>"
+            ),
+            htmltools::HTML
+          ),
+          icon = a1_icon,
+          options = markerOptions(
+            rotationAngle = ~track,
+            rotationOrigin = "center center"
+          ),
+          group = "Aeronaves A1"
+        )
+    }
+
+    # A2
+    if (!is.null(a2)) {
+      map <- map |>
+        addMarkers(
+          data = a2,
+          lng = ~lon,
+          lat = ~lat,
+          label = ~ lapply(
+            paste0(
+              "<div style='font-family: sans-serif; min-width: 150px;'>",
+              "<h5 style='margin: 0 0 5px 0; color: #2e2e2eff;'>",
+              ifelse(flight == "", "N/A", flight),
+              "</h5>",
+              "<hr style='margin: 5px 0;'>",
+              "<b>Código:</b> ",
+              r,
+              "<br>",
+              "<b>Aeronave:</b> ",
+              t,
+              "<br>",
+              "<b>Altitude:</b> ",
+              alt_baro,
+              " ft",
+              "<br>",
+              "<b>Velocidade (GS):</b> ",
+              gs,
+              " kt",
+              "</div>"
+            ),
+            htmltools::HTML
+          ),
+          icon = a2_icon,
+          options = markerOptions(
+            rotationAngle = ~track,
+            rotationOrigin = "center center"
+          ),
+          group = "Aeronaves A2"
+        )
+    }
+
+    # A3
+    if (!is.null(a3)) {
+      map <- map |>
+        addMarkers(
+          data = a3,
+          lng = ~lon,
+          lat = ~lat,
+          label = ~ lapply(
+            paste0(
+              "<div style='font-family: sans-serif; min-width: 150px;'>",
+              "<h5 style='margin: 0 0 5px 0; color: #2e2e2eff;'>",
+              ifelse(flight == "", "N/A", flight),
+              "</h5>",
+              "<hr style='margin: 5px 0;'>",
+              "<b>Código:</b> ",
+              r,
+              "<br>",
+              "<b>Aeronave:</b> ",
+              t,
+              "<br>",
+              "<b>Altitude:</b> ",
+              alt_baro,
+              " ft",
+              "<br>",
+              "<b>Velocidade (GS):</b> ",
+              gs,
+              " kt",
+              "</div>"
+            ),
+            htmltools::HTML
+          ),
+          icon = a3_icon,
+          options = markerOptions(
+            rotationAngle = ~track,
+            rotationOrigin = "center center"
+          ),
+          group = "Aeronaves A3"
+        )
+    }
+
+    # A4
+    if (!is.null(a4)) {
+      map <- map |>
+        addMarkers(
+          data = a4,
+          lng = ~lon,
+          lat = ~lat,
+          label = ~ lapply(
+            paste0(
+              "<div style='font-family: sans-serif; min-width: 150px;'>",
+              "<h5 style='margin: 0 0 5px 0; color: #2e2e2eff;'>",
+              ifelse(flight == "", "N/A", flight),
+              "</h5>",
+              "<hr style='margin: 5px 0;'>",
+              "<b>Código:</b> ",
+              r,
+              "<br>",
+              "<b>Aeronave:</b> ",
+              t,
+              "<br>",
+              "<b>Altitude:</b> ",
+              alt_baro,
+              " ft",
+              "<br>",
+              "<b>Velocidade (GS):</b> ",
+              gs,
+              " kt",
+              "</div>"
+            ),
+            htmltools::HTML
+          ),
+          icon = a4_icon,
+          options = markerOptions(
+            rotationAngle = ~track,
+            rotationOrigin = "center center"
+          ),
+          group = "Aeronaves A4"
+        )
+    }
+
+    # A5
+    if (!is.null(a5)) {
+      map <- map |>
+        addMarkers(
+          data = a5,
+          lng = ~lon,
+          lat = ~lat,
+          label = ~ lapply(
+            paste0(
+              "<div style='font-family: sans-serif; min-width: 150px;'>",
+              "<h5 style='margin: 0 0 5px 0; color: #2e2e2eff;'>",
+              ifelse(flight == "", "N/A", flight),
+              "</h5>",
+              "<hr style='margin: 5px 0;'>",
+              "<b>Código:</b> ",
+              r,
+              "<br>",
+              "<b>Aeronave:</b> ",
+              t,
+              "<br>",
+              "<b>Altitude:</b> ",
+              alt_baro,
+              " ft",
+              "<br>",
+              "<b>Velocidade (GS):</b> ",
+              gs,
+              " kt",
+              "</div>"
+            ),
+            htmltools::HTML
+          ),
+          icon = a5_icon,
+          options = markerOptions(
+            rotationAngle = ~track,
+            rotationOrigin = "center center"
+          ),
+          group = "Aeronaves A5"
+        )
+    }
+
+    # A6
+    if (!is.null(a6)) {
+      map <- map |>
+        addMarkers(
+          data = a6,
+          lng = ~lon,
+          lat = ~lat,
+          label = ~ lapply(
+            paste0(
+              "<div style='font-family: sans-serif; min-width: 150px;'>",
+              "<h5 style='margin: 0 0 5px 0; color: #2e2e2eff;'>",
+              ifelse(flight == "", "N/A", flight),
+              "</h5>",
+              "<hr style='margin: 5px 0;'>",
+              "<b>Código:</b> ",
+              r,
+              "<br>",
+              "<b>Aeronave:</b> ",
+              t,
+              "<br>",
+              "<b>Altitude:</b> ",
+              alt_baro,
+              " ft",
+              "<br>",
+              "<b>Velocidade (GS):</b> ",
+              gs,
+              " kt",
+              "</div>"
+            ),
+            htmltools::HTML
+          ),
+          icon = a6_icon,
+          options = markerOptions(
+            rotationAngle = ~track,
+            rotationOrigin = "center center"
+          ),
+          group = "Aeronaves A6"
+        )
+    }
+
+    # A7
+    if (!is.null(a7)) {
+      map <- map |>
+        addMarkers(
+          data = a7,
+          lng = ~lon,
+          lat = ~lat,
+          label = ~ lapply(
+            paste0(
+              "<div style='font-family: sans-serif; min-width: 150px;'>",
+              "<h5 style='margin: 0 0 5px 0; color: #2e2e2eff;'>",
+              ifelse(flight == "", "N/A", flight),
+              "</h5>",
+              "<hr style='margin: 5px 0;'>",
+              "<b>Código:</b> ",
+              r,
+              "<br>",
+              "<b>Aeronave:</b> ",
+              t,
+              "<br>",
+              "<b>Altitude:</b> ",
+              alt_baro,
+              " ft",
+              "<br>",
+              "<b>Velocidade (GS):</b> ",
+              gs,
+              " kt",
+              "</div>"
+            ),
+            htmltools::HTML
+          ),
+          icon = a7_icon,
+          options = markerOptions(
+            rotationAngle = ~track,
+            rotationOrigin = "center center"
+          ),
+          group = "Aeronaves A7"
+        )
+    }
+
+    map
   })
 }
 
