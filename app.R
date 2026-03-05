@@ -4,7 +4,47 @@ library(bslib)
 library(leaflet)
 library(htmltools)
 library(htmlwidgets)
-library(adsbr)
+library(httr2)
+library(purrr)
+library(tibble)
+
+# Functions
+fetch_point <- function(lat, lon, radius) {
+  base_url = "https://api.adsb.lol/v2"
+
+  res <- httr2::request(base_url) |>
+    httr2::req_throttle(capacity = 60, fill_time_s = 60) |>
+    httr2::req_url_path_append("lat") |>
+    httr2::req_url_path_append(lat) |>
+    httr2::req_url_path_append("lon") |>
+    httr2::req_url_path_append(lon) |>
+    httr2::req_url_path_append("dist") |>
+    httr2::req_url_path_append(radius) |>
+    httr2::req_perform() |>
+    httr2::resp_body_json()
+
+  # Isolate response data
+  a <- res$ac
+
+  # Unlist sublists
+  b <- purrr::map(a, \(x) {
+    purrr::map(x, \(y) if (is.list(y)) paste(unlist(y), collapse = ", ") else y)
+  })
+
+  # Convert each list to a tibble
+  c <- purrr::map(b, tibble::as_tibble)
+
+  # Fix alt_barro variable type and convert to tibble
+  d <- purrr::map(b, \(y) {
+    y$alt_baro <- as.character(y$alt_baro)
+    return(tibble::as_tibble(y))
+  })
+
+  # Bind all tibbles
+  e <- purrr::list_rbind(d)
+
+  return(e)
+}
 
 ui <- page_sidebar(
   tags$head(
@@ -36,7 +76,7 @@ ui <- page_sidebar(
           autoplay = TRUE,
           style = "width: 100%;",
           tags$source(
-            src = "http://nr9.newradio.it:9211/stream",
+            src = "http://143.198.131.18:8000/sbjr_tower",
             type = "audio/mpeg"
           ),
           "Your browser does not support the audio element."
@@ -51,7 +91,22 @@ ui <- page_sidebar(
           autoplay = TRUE,
           style = "width: 100%;",
           tags$source(
-            src = "http://nr9.newradio.it:9211/stream",
+            src = "http://143.198.131.18:8000/sbjr_ground",
+            type = "audio/mpeg"
+          ),
+          "Your browser does not support the audio element."
+        )
+      ),
+    ),
+    card(
+      card_header("Controle Setor T7 120.545 Mhz"),
+      card_body(
+        tags$audio(
+          controls = TRUE,
+          autoplay = TRUE,
+          style = "width: 100%;",
+          tags$source(
+            src = "http://143.198.131.18:8000/atc_t7",
             type = "audio/mpeg"
           ),
           "Your browser does not support the audio element."
@@ -326,7 +381,6 @@ server <- function(input, output, session) {
 
     # Fetch data
     res <- fetch_point(
-      provider = "adsb_lol",
       lat = center_lat,
       lon = center_lon,
       radius = input$radius
