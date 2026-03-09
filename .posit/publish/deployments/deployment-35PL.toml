@@ -2,7 +2,7 @@
 '$schema' = 'https://cdn.posit.co/publisher/schemas/posit-publishing-record-schema-v3.json'
 server_type = 'connect_cloud'
 server_url = 'https://connect.posit.cloud'
-client_version = '1.35.6'
+client_version = '1.35.8'
 created_at = ''
 dismissed_at = ''
 type = 'r-shiny'
@@ -11,8 +11,8 @@ id = '019cbe2b-3657-89f4-5f9f-57d79f86a1db'
 dashboard_url = 'https://connect.posit.cloud/rfsaldanha/content/019cbe2b-3657-89f4-5f9f-57d79f86a1db'
 direct_url = 'https://019cbe2b-3657-89f4-5f9f-57d79f86a1db.share.connect.posit.cloud'
 logs_url = 'https://connect.posit.cloud/rfsaldanha/content/019cbe2b-3657-89f4-5f9f-57d79f86a1db/history'
-deployed_at = '2026-03-05T10:23:37-03:00'
-bundle_id = '019cbe2b-365a-62ec-fbb7-30307afd0e7b'
+deployed_at = '2026-03-09T12:19:32-03:00'
+bundle_id = '019cd32e-916d-13ed-d86c-ba5bb640decc'
 files = [
   '.posit/publish/deployments/deployment-35PL.toml',
   '.posit/publish/sbjrlive-FU67.toml',
@@ -91,6 +91,28 @@ needscompilation = 'no'
 author = 'R Special Interest Group on Databases (R-SIG-DB) [aut], Hadley Wickham [aut], Kirill Müller [aut, cre] (ORCID: <https://orcid.org/0000-0002-1416-3412>), R Consortium [fnd]'
 'config/testthat/edition' = '3'
 'config/needs/website' = 'r-dbi/DBItest, r-dbi/dbitemplate, adbi, AzureKusto, bigrquery, DatabaseConnector, dittodb, duckdb, implyr, lazysf, odbc, pool, RAthena, IMSMWU/RClickhouse, RH2, RJDBC, RMariaDB, RMySQL, RPostgres, RPostgreSQL, RPresto, RSQLite, sergeant, sparklyr, withr'
+
+[renv.packages.DT]
+package = 'DT'
+version = '0.34.0'
+source = 'Repository'
+repository = 'CRAN'
+hash = ''
+type = 'Package'
+title = "A Wrapper of the JavaScript Library 'DataTables'"
+'authors@r' = 'c( person("Yihui", "Xie", role = "aut"), person("Joe", "Cheng", , "joe@posit.co", role = "aut"), person("Xianying", "Tan", role = "aut"), person("Garrick", "Aden-Buie", , "garrick@posit.co", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-7111-0077")), person("JJ", "Allaire", role = "ctb"), person("Maximilian", "Girlich", role = "ctb"), person("Greg", "Freedman Ellis", role = "ctb"), person("Johannes", "Rauh", role = "ctb"), person("SpryMedia Limited", role = c("ctb", "cph"), comment = "DataTables in htmlwidgets/lib"), person("Brian", "Reavis", role = c("ctb", "cph"), comment = "selectize.js in htmlwidgets/lib"), person("Leon", "Gersen", role = c("ctb", "cph"), comment = "noUiSlider in htmlwidgets/lib"), person("Bartek", "Szopka", role = c("ctb", "cph"), comment = "jquery.highlight.js in htmlwidgets/lib"), person("Alex", "Pickering", role = "ctb"), person("William", "Holmes", role = "ctb"), person("Mikko", "Marttila", role = "ctb"), person("Andres", "Quintero", role = "ctb"), person("Stéphane", "Laurent", role = "ctb"), person("Posit Software, PBC", role = c("cph", "fnd")) )'
+maintainer = 'Garrick Aden-Buie <garrick@posit.co>'
+description = "Data objects in R can be rendered as HTML tables using the JavaScript library 'DataTables' (typically via R Markdown or Shiny). The 'DataTables' library has been included in this R package. The package name 'DT' is an abbreviation of 'DataTables'."
+url = 'https://github.com/rstudio/DT'
+bugreports = 'https://github.com/rstudio/DT/issues'
+license = 'MIT + file LICENSE'
+imports = ['crosstalk', 'htmltools (>= 0.3.6)', 'htmlwidgets (>= 1.3)', 'jquerylib', 'jsonlite (>= 0.9.16)', 'magrittr', 'promises']
+suggests = ['bslib', 'future', 'httpuv', 'knitr (>= 1.8)', 'rmarkdown', 'shiny (>= 1.6)', 'testit', 'tibble']
+vignettebuilder = 'knitr'
+roxygennote = '7.3.2'
+encoding = 'UTF-8'
+needscompilation = 'no'
+author = 'Yihui Xie [aut], Joe Cheng [aut], Xianying Tan [aut], Garrick Aden-Buie [aut, cre] (ORCID: <https://orcid.org/0000-0002-7111-0077>), JJ Allaire [ctb], Maximilian Girlich [ctb], Greg Freedman Ellis [ctb], Johannes Rauh [ctb], SpryMedia Limited [ctb, cph] (DataTables in htmlwidgets/lib), Brian Reavis [ctb, cph] (selectize.js in htmlwidgets/lib), Leon Gersen [ctb, cph] (noUiSlider in htmlwidgets/lib), Bartek Szopka [ctb, cph] (jquery.highlight.js in htmlwidgets/lib), Alex Pickering [ctb], William Holmes [ctb], Mikko Marttila [ctb], Andres Quintero [ctb], Stéphane Laurent [ctb], Posit Software, PBC [cph, fnd]'
 
 [renv.packages.KernSmooth]
 package = 'KernSmooth'
@@ -483,6 +505,31 @@ encoding = 'UTF-8'
 needscompilation = 'yes'
 author = 'Dirk Eddelbuettel [aut, cre] (ORCID: <https://orcid.org/0000-0001-6419-907X>), Antoine Lucas [ctb] (ORCID: <https://orcid.org/0000-0002-8059-9767>), Jarek Tuszynski [ctb], Henrik Bengtsson [ctb] (ORCID: <https://orcid.org/0000-0002-7579-5165>), Simon Urbanek [ctb] (ORCID: <https://orcid.org/0000-0003-2297-1732>), Mario Frasca [ctb], Bryan Lewis [ctb], Murray Stokely [ctb], Hannes Muehleisen [ctb] (ORCID: <https://orcid.org/0000-0001-8552-0029>), Duncan Murdoch [ctb], Jim Hester [ctb] (ORCID: <https://orcid.org/0000-0002-2739-7082>), Wush Wu [ctb] (ORCID: <https://orcid.org/0000-0001-5180-0567>), Qiang Kou [ctb] (ORCID: <https://orcid.org/0000-0001-6786-5453>), Thierry Onkelinx [ctb] (ORCID: <https://orcid.org/0000-0001-8804-4216>), Michel Lang [ctb] (ORCID: <https://orcid.org/0000-0001-9754-0393>), Viliam Simko [ctb], Kurt Hornik [ctb] (ORCID: <https://orcid.org/0000-0003-4198-9911>), Radford Neal [ctb] (ORCID: <https://orcid.org/0000-0002-2473-3407>), Kendon Bell [ctb] (ORCID: <https://orcid.org/0000-0002-9093-8312>), Matthew de Queljoe [ctb], Dmitry Selivanov [ctb] (ORCID: <https://orcid.org/0000-0003-0492-6647>), Ion Suruceanu [ctb] (ORCID: <https://orcid.org/0009-0005-6446-4909>), Bill Denney [ctb] (ORCID: <https://orcid.org/0000-0002-5759-428X>), Dirk Schumacher [ctb], András Svraka [ctb] (ORCID: <https://orcid.org/0009-0008-8480-1329>), Sergey Fedorov [ctb] (ORCID: <https://orcid.org/0000-0002-5970-7233>), Will Landau [ctb] (ORCID: <https://orcid.org/0000-0003-1878-3253>), Floris Vanderhaeghe [ctb] (ORCID: <https://orcid.org/0000-0002-6378-6229>), Kevin Tappe [ctb], Harris McGehee [ctb], Tim Mastny [ctb], Aaron Peikert [ctb] (ORCID: <https://orcid.org/0000-0001-7813-818X>), Mark van der Loo [ctb] (ORCID: <https://orcid.org/0000-0002-9807-4686>), Chris Muir [ctb] (ORCID: <https://orcid.org/0000-0003-2555-3878>), Moritz Beller [ctb] (ORCID: <https://orcid.org/0000-0003-4852-0526>), Sebastian Campbell [ctb] (ORCID: <https://orcid.org/0009-0000-5948-4503>), Winston Chang [ctb] (ORCID: <https://orcid.org/0000-0002-1576-2126>), Dean Attali [ctb] (ORCID: <https://orcid.org/0000-0002-5645-3493>), Michael Chirico [ctb] (ORCID: <https://orcid.org/0000-0003-0787-087X>), Kevin Ushey [ctb] (ORCID: <https://orcid.org/0000-0003-2880-7407>), Carl Pearson [ctb] (ORCID: <https://orcid.org/0000-0003-0701-7860>)'
 
+[renv.packages.dplyr]
+package = 'dplyr'
+version = '1.2.0'
+source = 'Repository'
+repository = 'CRAN'
+depends = ['R (>= 4.1.0)']
+hash = ''
+type = 'Package'
+title = 'A Grammar of Data Manipulation'
+'authors@r' = 'c( person("Hadley", "Wickham", , "hadley@posit.co", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4757-117X")), person("Romain", "François", role = "aut", comment = c(ORCID = "0000-0002-2444-4226")), person("Lionel", "Henry", role = "aut"), person("Kirill", "Müller", role = "aut", comment = c(ORCID = "0000-0002-1416-3412")), person("Davis", "Vaughan", , "davis@posit.co", role = "aut", comment = c(ORCID = "0000-0003-4777-038X")), person("Posit Software, PBC", role = c("cph", "fnd")) )'
+maintainer = 'Hadley Wickham <hadley@posit.co>'
+description = 'A fast, consistent tool for working with data frame like objects, both in memory and out of memory.'
+url = 'https://dplyr.tidyverse.org, https://github.com/tidyverse/dplyr'
+bugreports = 'https://github.com/tidyverse/dplyr/issues'
+license = 'MIT + file LICENSE'
+imports = ['cli (>= 3.6.2)', 'generics', 'glue (>= 1.3.2)', 'lifecycle (>= 1.0.5)', 'magrittr (>= 1.5)', 'methods', 'pillar (>= 1.9.0)', 'R6', 'rlang (>= 1.1.7)', 'tibble (>= 3.2.0)', 'tidyselect (>= 1.2.0)', 'utils', 'vctrs (>= 0.7.1)']
+suggests = ['broom', 'covr', 'DBI', 'dbplyr (>= 2.2.1)', 'ggplot2', 'knitr', 'Lahman', 'lobstr', 'nycflights13', 'purrr', 'rmarkdown', 'RSQLite', 'stringi (>= 1.7.6)', 'testthat (>= 3.1.5)', 'tidyr (>= 1.3.0)', 'withr']
+vignettebuilder = 'knitr'
+roxygennote = '7.3.3'
+encoding = 'UTF-8'
+needscompilation = 'yes'
+author = 'Hadley Wickham [aut, cre] (ORCID: <https://orcid.org/0000-0003-4757-117X>), Romain François [aut] (ORCID: <https://orcid.org/0000-0002-2444-4226>), Lionel Henry [aut], Kirill Müller [aut] (ORCID: <https://orcid.org/0000-0002-1416-3412>), Davis Vaughan [aut] (ORCID: <https://orcid.org/0000-0003-4777-038X>), Posit Software, PBC [cph, fnd]'
+'config/testthat/edition' = '3'
+'config/needs/website' = 'tidyverse/tidytemplate'
+
 [renv.packages.e1071]
 package = 'e1071'
 version = '1.7-17'
@@ -605,14 +652,14 @@ author = 'R Core Team [aut, cph, cre], Roger Bivand [ctb, cph], Vincent J. Carey
 
 [renv.packages.fs]
 package = 'fs'
-version = '1.6.6'
+version = '1.6.7'
 source = 'Repository'
 repository = 'CRAN'
-depends = ['R (>= 3.6)']
+depends = ['R (>= 4.1)']
 hash = ''
 title = "Cross-Platform File System Operations Based on 'libuv'"
-'authors@r' = 'c( person("Jim", "Hester", role = "aut"), person("Hadley", "Wickham", , "hadley@posit.co", role = "aut"), person("Gábor", "Csárdi", , "csardi.gabor@gmail.com", role = c("aut", "cre")), person("libuv project contributors", role = "cph", comment = "libuv library"), person("Joyent, Inc. and other Node contributors", role = "cph", comment = "libuv library"), person("Posit Software, PBC", role = c("cph", "fnd")) )'
-maintainer = 'Gábor Csárdi <csardi.gabor@gmail.com>'
+'authors@r' = 'c( person("Jim", "Hester", role = "aut"), person("Hadley", "Wickham", role = "aut"), person("Gábor", "Csárdi", role = "aut"), person("Jeroen", "Ooms", , "jeroenooms@gmail.com", role = "cre"), person("libuv project contributors", role = "cph", comment = "libuv library"), person("Joyent, Inc. and other Node contributors", role = "cph", comment = "libuv library"), person("Posit Software, PBC", role = c("cph", "fnd"), comment = c(ROR = "03wc8by49")) )'
+maintainer = 'Jeroen Ooms <jeroenooms@gmail.com>'
 description = "A cross-platform interface to file system operations, built on top of the 'libuv' C library."
 url = 'https://fs.r-lib.org, https://github.com/r-lib/fs'
 bugreports = 'https://github.com/r-lib/fs/issues'
@@ -620,13 +667,36 @@ license = 'MIT + file LICENSE'
 imports = ['methods']
 suggests = ['covr', 'crayon', 'knitr', 'pillar (>= 1.0.0)', 'rmarkdown', 'spelling', 'testthat (>= 3.0.0)', 'tibble (>= 1.1.0)', 'vctrs (>= 0.3.0)', 'withr']
 vignettebuilder = 'knitr'
-roxygennote = '7.2.3'
+roxygennote = '7.3.3'
 encoding = 'UTF-8'
 needscompilation = 'yes'
-author = 'Jim Hester [aut], Hadley Wickham [aut], Gábor Csárdi [aut, cre], libuv project contributors [cph] (libuv library), Joyent, Inc. and other Node contributors [cph] (libuv library), Posit Software, PBC [cph, fnd]'
+author = 'Jim Hester [aut], Hadley Wickham [aut], Gábor Csárdi [aut], Jeroen Ooms [cre], libuv project contributors [cph] (libuv library), Joyent, Inc. and other Node contributors [cph] (libuv library), Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)'
 'config/testthat/edition' = '3'
 'config/needs/website' = 'tidyverse/tidytemplate'
 systemrequirements = 'GNU make'
+
+[renv.packages.generics]
+package = 'generics'
+version = '0.1.4'
+source = 'Repository'
+repository = 'CRAN'
+depends = ['R (>= 3.6)']
+hash = ''
+title = 'Common S3 Generics not Provided by Base R Methods Related to Model Fitting'
+'authors@r' = 'c( person("Hadley", "Wickham", , "hadley@posit.co", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4757-117X")), person("Max", "Kuhn", , "max@posit.co", role = "aut"), person("Davis", "Vaughan", , "davis@posit.co", role = "aut"), person("Posit Software, PBC", role = c("cph", "fnd"), comment = c(ROR = "https://ror.org/03wc8by49")) )'
+maintainer = 'Hadley Wickham <hadley@posit.co>'
+description = 'In order to reduce potential package dependencies and conflicts, generics provides a number of commonly used S3 generics.'
+url = 'https://generics.r-lib.org, https://github.com/r-lib/generics'
+bugreports = 'https://github.com/r-lib/generics/issues'
+license = 'MIT + file LICENSE'
+imports = ['methods']
+suggests = ['covr', 'pkgload', 'testthat (>= 3.0.0)', 'tibble', 'withr']
+roxygennote = '7.3.2'
+encoding = 'UTF-8'
+needscompilation = 'no'
+author = 'Hadley Wickham [aut, cre] (ORCID: <https://orcid.org/0000-0003-4757-117X>), Max Kuhn [aut], Davis Vaughan [aut], Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)'
+'config/testthat/edition' = '3'
+'config/needs/website' = 'tidyverse/tidytemplate'
 
 [renv.packages.glue]
 package = 'glue'
@@ -654,7 +724,7 @@ author = 'Jim Hester [aut] (<https://orcid.org/0000-0002-2739-7082>), Jennifer B
 
 [renv.packages.highr]
 package = 'highr'
-version = '0.11'
+version = '0.12'
 source = 'Repository'
 repository = 'CRAN'
 depends = ['R (>= 3.3.0)']
@@ -670,10 +740,10 @@ license = 'GPL'
 imports = ['xfun (>= 0.18)']
 suggests = ['knitr', 'markdown', 'testit']
 vignettebuilder = 'knitr'
-roxygennote = '7.3.1'
+roxygennote = '7.3.3'
 encoding = 'UTF-8'
 needscompilation = 'no'
-author = 'Yihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>), Yixuan Qiu [aut], Christopher Gandrud [ctb], Qiang Li [ctb]'
+author = 'Yihui Xie [aut, cre] (ORCID: <https://orcid.org/0000-0003-0645-5666>), Yixuan Qiu [aut], Christopher Gandrud [ctb], Qiang Li [ctb]'
 
 [renv.packages.htmltools]
 package = 'htmltools'
@@ -1617,14 +1687,14 @@ author = 'Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>), Gáb
 
 [renv.packages.terra]
 package = 'terra'
-version = '1.8-93'
+version = '1.9-1'
 source = 'Repository'
 repository = 'CRAN'
 depends = ['R (>= 3.5.0)', 'methods']
 hash = ''
 type = 'Package'
 title = 'Spatial Data Analysis'
-'authors@r' = 'c( person("Robert J.", "Hijmans", role=c("cre", "aut"),   email="r.hijmans@gmail.com", comment=c(ORCID="0000-0001-5872-2872")),			 person("Márcia", "Barbosa", role="ctb", comment=c(ORCID="0000-0001-8972-7713")), person("Roger", "Bivand", role="ctb", comment=c(ORCID="0000-0003-2392-6140")), person("Andrew", "Brown", role="ctb", comment=c(ORCID="0000-0002-4565-533X")), person("Michael", "Chirico", role="ctb", comment=c(ORCID="0000-0003-0787-087X")), person("Emanuele", "Cordano", role="ctb",comment=c(ORCID="0000-0002-3508-5898")), person("Krzysztof", "Dyba", role="ctb", comment=c(ORCID="0000-0002-8614-3816")), person("Edzer", "Pebesma", role="ctb", comment=c(ORCID="0000-0001-8049-7069")), person("Barry", "Rowlingson", role="ctb", comment=c(ORCID="0000-0002-8586-6625")), person("Michael D.", "Sumner", role="ctb", comment=c(ORCID="0000-0002-2471-7511")))'
+'authors@r' = 'c( person("Robert J.", "Hijmans", role=c("cre", "aut"),   email="r.hijmans@gmail.com", comment=c(ORCID="0000-0001-5872-2872")),			 person("Andrew", "Brown", role="aut", comment=c(ORCID="0000-0002-4565-533X")), person("Márcia", "Barbosa", role="aut", comment=c(ORCID="0000-0001-8972-7713")), person("Roger", "Bivand", role="ctb", comment=c(ORCID="0000-0003-2392-6140")), person("Michael", "Chirico", role="ctb", comment=c(ORCID="0000-0003-0787-087X")), person("Emanuele", "Cordano", role="ctb",comment=c(ORCID="0000-0002-3508-5898")), person("Krzysztof", "Dyba", role="ctb", comment=c(ORCID="0000-0002-8614-3816")), person("Edzer", "Pebesma", role="ctb", comment=c(ORCID="0000-0001-8049-7069")), person("Barry", "Rowlingson", role="ctb", comment=c(ORCID="0000-0002-8586-6625")), person("Michael D.", "Sumner", role="ctb", comment=c(ORCID="0000-0002-2471-7511")))'
 maintainer = 'Robert J. Hijmans <r.hijmans@gmail.com>'
 description = 'Methods for spatial data analysis with vector (points, lines, polygons) and raster (grid) data. Methods for vector data include geometric operations such as intersect and buffer. Raster methods include local, focal, global, zonal and geometric operations. The predict and interpolate methods facilitate the use of regression type (interpolation, machine learning) models for spatial prediction, including with satellite remote sensing data. Processing of very large files is supported. See the manual and tutorials on <https://rspatial.org/> to get started.'
 url = 'https://rspatial.org/, https://rspatial.github.io/terra/'
@@ -1635,7 +1705,7 @@ suggests = ['parallel', 'tinytest', 'ncdf4', 'sf (>= 0.9-8)', 'deldir', 'XML', '
 linkingto = ['Rcpp']
 encoding = 'UTF-8'
 needscompilation = 'yes'
-author = 'Robert J. Hijmans [cre, aut] (ORCID: <https://orcid.org/0000-0001-5872-2872>), Márcia Barbosa [ctb] (ORCID: <https://orcid.org/0000-0001-8972-7713>), Roger Bivand [ctb] (ORCID: <https://orcid.org/0000-0003-2392-6140>), Andrew Brown [ctb] (ORCID: <https://orcid.org/0000-0002-4565-533X>), Michael Chirico [ctb] (ORCID: <https://orcid.org/0000-0003-0787-087X>), Emanuele Cordano [ctb] (ORCID: <https://orcid.org/0000-0002-3508-5898>), Krzysztof Dyba [ctb] (ORCID: <https://orcid.org/0000-0002-8614-3816>), Edzer Pebesma [ctb] (ORCID: <https://orcid.org/0000-0001-8049-7069>), Barry Rowlingson [ctb] (ORCID: <https://orcid.org/0000-0002-8586-6625>), Michael D. Sumner [ctb] (ORCID: <https://orcid.org/0000-0002-2471-7511>)'
+author = 'Robert J. Hijmans [cre, aut] (ORCID: <https://orcid.org/0000-0001-5872-2872>), Andrew Brown [aut] (ORCID: <https://orcid.org/0000-0002-4565-533X>), Márcia Barbosa [aut] (ORCID: <https://orcid.org/0000-0001-8972-7713>), Roger Bivand [ctb] (ORCID: <https://orcid.org/0000-0003-2392-6140>), Michael Chirico [ctb] (ORCID: <https://orcid.org/0000-0003-0787-087X>), Emanuele Cordano [ctb] (ORCID: <https://orcid.org/0000-0002-3508-5898>), Krzysztof Dyba [ctb] (ORCID: <https://orcid.org/0000-0002-8614-3816>), Edzer Pebesma [ctb] (ORCID: <https://orcid.org/0000-0001-8049-7069>), Barry Rowlingson [ctb] (ORCID: <https://orcid.org/0000-0002-8586-6625>), Michael D. Sumner [ctb] (ORCID: <https://orcid.org/0000-0002-2471-7511>)'
 systemrequirements = 'C++17, GDAL (>= 2.2.3), GEOS (>= 3.4.0), PROJ (>= 4.9.3), TBB, sqlite3'
 
 [renv.packages.tibble]
@@ -1659,6 +1729,30 @@ roxygennote = '7.3.3.9000'
 encoding = 'UTF-8'
 needscompilation = 'yes'
 author = 'Kirill Müller [aut, cre] (ORCID: <https://orcid.org/0000-0002-1416-3412>), Hadley Wickham [aut], Romain Francois [ctb], Jennifer Bryan [ctb], Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)'
+'config/testthat/edition' = '3'
+'config/needs/website' = 'tidyverse/tidytemplate'
+
+[renv.packages.tidyselect]
+package = 'tidyselect'
+version = '1.2.1'
+source = 'Repository'
+repository = 'CRAN'
+depends = ['R (>= 3.4)']
+hash = ''
+title = 'Select from a Set of Strings'
+'authors@r' = 'c( person("Lionel", "Henry", , "lionel@posit.co", role = c("aut", "cre")), person("Hadley", "Wickham", , "hadley@posit.co", role = "aut"), person("Posit Software, PBC", role = c("cph", "fnd")) )'
+maintainer = 'Lionel Henry <lionel@posit.co>'
+description = "A backend for the selecting functions of the 'tidyverse'.  It makes it easy to implement select-like functions in your own packages in a way that is consistent with other 'tidyverse' interfaces for selection."
+url = 'https://tidyselect.r-lib.org, https://github.com/r-lib/tidyselect'
+bugreports = 'https://github.com/r-lib/tidyselect/issues'
+license = 'MIT + file LICENSE'
+imports = ['cli (>= 3.3.0)', 'glue (>= 1.3.0)', 'lifecycle (>= 1.0.3)', 'rlang (>= 1.0.4)', 'vctrs (>= 0.5.2)', 'withr']
+suggests = ['covr', 'crayon', 'dplyr', 'knitr', 'magrittr', 'rmarkdown', 'stringr', 'testthat (>= 3.1.1)', 'tibble (>= 2.1.3)']
+vignettebuilder = 'knitr'
+roxygennote = '7.3.0.9000'
+encoding = 'UTF-8'
+needscompilation = 'yes'
+author = 'Lionel Henry [aut, cre], Hadley Wickham [aut], Posit Software, PBC [cph, fnd]'
 'config/testthat/edition' = '3'
 'config/needs/website' = 'tidyverse/tidytemplate'
 
