@@ -7,6 +7,8 @@ library(htmlwidgets)
 library(httr2)
 library(purrr)
 library(tibble)
+library(DT)
+library(dplyr)
 
 # Functions
 fetch_point <- function(lat, lon, radius) {
@@ -76,7 +78,7 @@ ui <- page_sidebar(
           autoplay = TRUE,
           style = "width: 100%;",
           tags$source(
-            src = "http://143.198.131.18:8000/sbjr_tower",
+            src = "https://securestreams.autopo.st:2627/sbjr_tower",
             type = "audio/mpeg"
           ),
           "Your browser does not support the audio element."
@@ -91,7 +93,7 @@ ui <- page_sidebar(
           autoplay = TRUE,
           style = "width: 100%;",
           tags$source(
-            src = "http://143.198.131.18:8000/sbjr_ground",
+            src = "https://securestreams.autopo.st:2627/sbjr_ground",
             type = "audio/mpeg"
           ),
           "Your browser does not support the audio element."
@@ -106,7 +108,7 @@ ui <- page_sidebar(
           autoplay = TRUE,
           style = "width: 100%;",
           tags$source(
-            src = "http://143.198.131.18:8000/atc_t7",
+            src = "https://securestreams.autopo.st:2627/atc_t7",
             type = "audio/mpeg"
           ),
           "Your browser does not support the audio element."
@@ -114,13 +116,25 @@ ui <- page_sidebar(
       ),
     )
   ),
-  card(
-    full_screen = TRUE,
-    card_header("ADS-B"),
-    card_body(
-      fillable = TRUE, # Allows the map to fill the card
-      padding = 0, # Removes white border around the map
-      leafletOutput("map", height = "100%")
+  page_fillable(
+    layout_columns(
+      card(
+        full_screen = TRUE,
+        card_header("ADS-B"),
+        card_body(
+          fillable = TRUE, # Allows the map to fill the card
+          padding = 0, # Removes white border around the map
+          leafletOutput("map", height = "100%")
+        )
+      ),
+      card(
+        full_screen = TRUE,
+        card_header("Voos"),
+        card_body(
+          DTOutput(outputId = "flights_table")
+        )
+      ),
+      col_widths = c(8, 4)
     )
   )
 )
@@ -451,10 +465,10 @@ server <- function(input, output, session) {
               ifelse(flight == "", "N/A", flight),
               "</h5>",
               "<hr style='margin: 5px 0;'>",
-              "<b>Código:</b> ",
+              "<b>Registro:</b> ",
               r,
               "<br>",
-              "<b>Aeronave:</b> ",
+              "<b>Tipo:</b> ",
               t,
               "<br>",
               "<b>Altitude:</b> ",
@@ -759,6 +773,22 @@ server <- function(input, output, session) {
 
     map
   })
+
+  output$flights_table <- renderDataTable(
+    flights_res() |>
+      select(
+        `Voo` = flight,
+        `Registro` = r,
+        `Tipo` = t,
+        `Alt. (b)` = alt_baro,
+        `Vel. (g)` = gs,
+        `Squawk` = squawk,
+        `Categoria` = category,
+        `ADS-B RSSI` = rssi,
+        `Lat.` = lat,
+        `Lon.` = lon
+      )
+  )
 }
 
 shinyApp(ui, server)
