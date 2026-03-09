@@ -374,17 +374,22 @@ server <- function(input, output, session) {
       )
   })
 
-  # Update map
-  observe({
+  # Update data
+  flights_res <- reactive({
     # Refresh every 10000 milliseconds
     invalidateLater(input$refresh_rate * 1000, session)
 
     # Fetch data
-    res <- fetch_point(
+    fetch_point(
       lat = center_lat,
       lon = center_lon,
       radius = input$radius
     )
+  })
+
+  # Update map
+  observe({
+    res <- flights_res()
 
     a0 <- NULL
     a1 <- NULL
