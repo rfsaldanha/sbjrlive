@@ -1,0 +1,18 @@
+Package: sbjrlive
+Title: SBJR Live ADS-B Dashboard
+Version: 0.0.0.9000
+Authors@R: person("Raphael", "Saldanha", role = c("aut", "cre"))
+Description: A Shiny dashboard for live ADS-B aircraft positions around SBJR.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports:
+    bslib,
+    dplyr,
+    DT,
+    htmltools,
+    htmlwidgets,
+    httr2,
+    leaflet,
+    purrr,
+    shiny,
+    tibble
