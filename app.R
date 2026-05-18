@@ -387,6 +387,31 @@ format_status <- function(status) {
   }
 }
 
+format_live_status <- function(status, data) {
+  if (is.null(status)) {
+    return("Aguardando primeira atualização.")
+  }
+
+  data <- normalize_flights(data)
+  updated_at <- format(status$updated_at, "%H:%M:%S")
+  total <- nrow(data)
+  helicopters <- sum(data$category == "A7", na.rm = TRUE)
+  providers_ok <- status$providers_ok %||% 1
+  provider_count <- status$provider_count %||% 1
+
+  paste0(
+    total,
+    " aeronave(s) | ",
+    helicopters,
+    " helicóptero(s) | ",
+    providers_ok,
+    "/",
+    provider_count,
+    " fontes online | ",
+    updated_at
+  )
+}
+
 display_value <- function(x) {
   value <- as.character(x)
   ifelse(is.na(value) | trimws(value) == "", "N/A", value)
@@ -565,19 +590,119 @@ aircraft_icons <- list(
 other_aircraft_icon <- aircraft_icon("uparrow.png")
 
 aircraft_groups <- c(
-  paste("Aeronaves", names(aircraft_icons)),
-  "Outras aeronaves"
+  "Helicópteros",
+  paste("Aeronaves", setdiff(names(aircraft_icons), "A7")),
+  "Outras"
 )
+
+aircraft_group_name <- function(category) {
+  if (identical(category, "A7")) {
+    "Helicópteros"
+  } else {
+    paste("Aeronaves", category)
+  }
+}
+
+audio_row <- function(label, src) {
+  tags$div(
+    class = "audio-row",
+    tags$div(class = "audio-label", label),
+    tags$audio(
+      controls = TRUE,
+      autoplay = TRUE,
+      preload = "none",
+      tags$source(src = src, type = "audio/mpeg"),
+      "Your browser does not support the audio element."
+    )
+  )
+}
 
 ui <- page_sidebar(
   tags$head(
     tags$style(HTML(
       "
       .recalculating { opacity: 1.0 !important; }
+      .bslib-sidebar-layout > .main {
+        min-width: 0;
+      }
+      .audio-panel {
+        display: grid;
+        gap: 0.55rem;
+        margin-top: 0.75rem;
+      }
+      .audio-row {
+        display: grid;
+        gap: 0.25rem;
+        padding: 0.55rem 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+      }
+      .audio-row:first-child {
+        border-top: 0;
+      }
+      .audio-label {
+        color: #2e2e2e;
+        font-size: 0.86rem;
+        font-weight: 650;
+        line-height: 1.2;
+      }
+      .audio-row audio {
+        display: block;
+        width: 100%;
+        height: 32px;
+      }
       #api_status {
         color: #5f6368;
         font-size: 0.875rem;
         margin-bottom: 0.5rem;
+      }
+      .summary-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 0.65rem;
+      }
+      .summary-chip {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 8px;
+        padding: 0.45rem 0.55rem;
+        background: #f8fafc;
+        min-width: 0;
+      }
+      .summary-value {
+        display: block;
+        color: #111827;
+        font-size: 1.15rem;
+        font-weight: 700;
+        line-height: 1.05;
+      }
+      .summary-label {
+        display: block;
+        color: #64748b;
+        font-size: 0.72rem;
+        line-height: 1.15;
+        margin-top: 0.16rem;
+      }
+      .map-card .card-body {
+        height: calc(100vh - 220px);
+        min-height: 520px;
+      }
+      .mobile-table {
+        display: none;
+      }
+      .desktop-table {
+        display: block;
+      }
+      @media (max-width: 767px) {
+        .map-card .card-body {
+          height: 62vh;
+          min-height: 380px;
+        }
+        .desktop-table {
+          display: none;
+        }
+        .mobile-table {
+          display: block;
+        }
       }
     "
     ))
@@ -600,55 +725,22 @@ ui <- page_sidebar(
       value = 50,
       step = 5
     ),
-    card(
-      card_header("118.4 Torre"),
-      card_body(
-        tags$audio(
-          controls = TRUE,
-          autoplay = TRUE,
-          style = "width: 100%;",
-          tags$source(
-            src = "https://securestreams.autopo.st:2627/sbjr_tower",
-            type = "audio/mpeg"
-          ),
-          "Your browser does not support the audio element."
-        )
-      )
+    checkboxInput(
+      "helicopters_only",
+      "Mostrar apenas helicópteros",
+      value = FALSE
     ),
-    card(
-      card_header("119.7 APP-RJ Baixo"),
-      card_body(
-        tags$audio(
-          controls = TRUE,
-          autoplay = TRUE,
-          style = "width: 100%;",
-          tags$source(
-            src = "https://securestreams.autopo.st:2627/app_rj_baixo",
-            type = "audio/mpeg"
-          ),
-          "Your browser does not support the audio element."
-        )
-      ),
-    ),
-    card(
-      card_header("120.6 APP-RJ Leste"),
-      card_body(
-        tags$audio(
-          controls = TRUE,
-          autoplay = TRUE,
-          style = "width: 100%;",
-          tags$source(
-            src = "https://securestreams.autopo.st:2627/app_rj_leste",
-            type = "audio/mpeg"
-          ),
-          "Your browser does not support the audio element."
-        )
-      ),
+    tags$section(
+      class = "audio-panel",
+      audio_row("118.4 Torre", "https://securestreams.autopo.st:2627/sbjr_tower"),
+      audio_row("119.7 APP-RJ Baixo", "https://securestreams.autopo.st:2627/app_rj_baixo"),
+      audio_row("120.6 APP-RJ Leste", "https://securestreams.autopo.st:2627/app_rj_leste")
     )
   ),
   page_fillable(
     layout_columns(
       card(
+        class = "map-card",
         full_screen = TRUE,
         card_header("ADS-B"),
         card_body(
@@ -661,8 +753,10 @@ ui <- page_sidebar(
         full_screen = TRUE,
         card_header("Voos"),
         card_body(
+          uiOutput("traffic_summary"),
           textOutput("api_status"),
-          DTOutput(outputId = "flights_table")
+          tags$div(class = "desktop-table", DTOutput(outputId = "flights_table")),
+          tags$div(class = "mobile-table", DTOutput(outputId = "flights_table_mobile"))
         )
       ),
       col_widths = c(8, 4)
@@ -732,6 +826,7 @@ server <- function(input, output, session) {
           "Pontos de navegação",
           "Espaço Aéreo do Pré-sal",
           "Raio de busca",
+          "Helicópteros",
           "Aeronaves A0",
           "Aeronaves A1",
           "Aeronaves A2",
@@ -739,8 +834,7 @@ server <- function(input, output, session) {
           "Aeronaves A4",
           "Aeronaves A5",
           "Aeronaves A6",
-          "Aeronaves A7",
-          "Outras aeronaves"
+          "Outras"
         ),
         options = layersControlOptions(collapsed = TRUE) # Deixa o controle aberto
       )
@@ -775,9 +869,44 @@ server <- function(input, output, session) {
     flights_fetch()$data
   })
 
+  visible_flights <- reactive({
+    data <- flights_res()
+    if (isTRUE(input$helicopters_only)) {
+      data <- data |>
+        filter(category == "A7")
+    }
+    data
+  })
+
   output$api_status <- renderText({
     flights_fetch()
-    format_status(last_fetch_status())
+    format_live_status(last_fetch_status(), flights_res())
+  })
+
+  output$traffic_summary <- renderUI({
+    data <- normalize_flights(flights_res())
+    helicopters <- sum(data$category == "A7", na.rm = TRUE)
+    other_aircraft <- max(nrow(data) - helicopters, 0)
+    source_count <- last_fetch_status()$providers_ok %||% 0
+
+    tags$div(
+      class = "summary-strip",
+      tags$div(
+        class = "summary-chip",
+        tags$span(class = "summary-value", nrow(data)),
+        tags$span(class = "summary-label", "Aeronaves")
+      ),
+      tags$div(
+        class = "summary-chip",
+        tags$span(class = "summary-value", helicopters),
+        tags$span(class = "summary-label", "Helicópteros")
+      ),
+      tags$div(
+        class = "summary-chip",
+        tags$span(class = "summary-value", source_count),
+        tags$span(class = "summary-label", "Fontes")
+      )
+    )
   })
 
   observeEvent(
@@ -800,7 +929,7 @@ server <- function(input, output, session) {
 
   # Update map
   observe({
-    res <- flights_res()
+    res <- visible_flights()
 
     map <- Reduce(
       \(proxy, group) clearGroup(proxy, group = group),
@@ -814,7 +943,7 @@ server <- function(input, output, session) {
         map = map,
         data = filter(res, category == !!category),
         icon = aircraft_icons[[category]],
-        group = paste("Aeronaves", category)
+        group = aircraft_group_name(category)
       )
     }
 
@@ -825,7 +954,7 @@ server <- function(input, output, session) {
       map = map,
       data = other_aircraft,
       icon = other_aircraft_icon,
-      group = "Outras aeronaves"
+      group = "Outras"
     )
 
     map
@@ -833,7 +962,7 @@ server <- function(input, output, session) {
 
   output$flights_table <- renderDT(
     {
-      flights_res() |>
+      visible_flights() |>
         normalize_flights() |>
         select(
           `Hex` = hex,
@@ -855,6 +984,28 @@ server <- function(input, output, session) {
     },
     options = list(
       pageLength = 10,
+      scrollX = TRUE,
+      language = list(emptyTable = "Nenhuma aeronave encontrada no raio atual.")
+    ),
+    rownames = FALSE
+  )
+
+  output$flights_table_mobile <- renderDT(
+    {
+      visible_flights() |>
+        normalize_flights() |>
+        select(
+          `Voo` = flight,
+          `Tipo` = t,
+          `Alt.` = alt_baro,
+          `Vel.` = gs,
+          `Fontes` = source_count
+        )
+    },
+    options = list(
+      pageLength = 6,
+      searching = FALSE,
+      lengthChange = FALSE,
       scrollX = TRUE,
       language = list(emptyTable = "Nenhuma aeronave encontrada no raio atual.")
     ),
