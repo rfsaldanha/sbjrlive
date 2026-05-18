@@ -11,22 +11,70 @@ library(DT)
 library(dplyr)
 
 # Functions
-adsb_providers <- c(
+default_adsb_providers <- c(
   "ADSB.lol" = "https://api.adsb.lol/v2",
   "Airplanes.live" = "https://api.airplanes.live/v2",
   "adsb.fi" = "https://opendata.adsb.fi/api/v2"
 )
 
-adsb_provider_paths <- c(
+default_adsb_provider_paths <- c(
   "ADSB.lol" = "latlon",
   "Airplanes.live" = "point",
   "adsb.fi" = "latlon"
 )
 
+parse_extra_adsb_providers <- function(spec = Sys.getenv("ADSB_EXTRA_PROVIDERS", "")) {
+  spec <- trimws(spec)
+  if (!nzchar(spec)) {
+    return(list(providers = character(), paths = character()))
+  }
+
+  entries <- trimws(strsplit(spec, ";", fixed = TRUE)[[1]])
+  entries <- entries[nzchar(entries)]
+  providers <- character()
+  paths <- character()
+
+  for (entry in entries) {
+    provider_parts <- trimws(strsplit(entry, "=", fixed = TRUE)[[1]])
+    if (length(provider_parts) != 2 || !nzchar(provider_parts[[1]]) || !nzchar(provider_parts[[2]])) {
+      warning("Skipping invalid ADSB_EXTRA_PROVIDERS entry: ", entry, call. = FALSE)
+      next
+    }
+
+    endpoint_parts <- trimws(strsplit(provider_parts[[2]], "\\|")[[1]])
+    url <- endpoint_parts[[1]]
+    path_style <- if (length(endpoint_parts) >= 2 && nzchar(endpoint_parts[[2]])) {
+      endpoint_parts[[2]]
+    } else {
+      "latlon"
+    }
+
+    if (!path_style %in% c("latlon", "point")) {
+      warning(
+        "Skipping ADSB_EXTRA_PROVIDERS entry with unsupported path style: ",
+        entry,
+        call. = FALSE
+      )
+      next
+    }
+
+    providers[[provider_parts[[1]]]] <- sub("/+$", "", url)
+    paths[[provider_parts[[1]]]] <- path_style
+  }
+
+  list(providers = providers, paths = paths)
+}
+
+extra_adsb_providers <- parse_extra_adsb_providers()
+adsb_providers <- c(default_adsb_providers, extra_adsb_providers$providers)
+adsb_provider_paths <- c(default_adsb_provider_paths, extra_adsb_providers$paths)
+
 adsb_cache <- new.env(parent = emptyenv())
-adsb_cache_ttl <- 3
+adsb_cache_ttl <- 10
 center_lat <- -22.9875
 center_lon <- -43.37
+history_ttl_secs <- 10 * 60
+nearby_helicopter_nm <- 10
 
 `%||%` <- function(x, y) {
   if (is.null(x)) y else x
@@ -128,6 +176,43 @@ freshness_score <- function(seen_pos, seen) {
   dplyr::coalesce(seen_pos, seen, Inf)
 }
 
+flight_key <- function(data) {
+  data <- normalize_flights(data)
+  ifelse(
+    has_value(data$hex),
+    paste0("hex:", tolower(data$hex)),
+    paste("fallback", data$flight, data$r, data$t, round(data$lat, 3), round(data$lon, 3), sep = "|")
+  )
+}
+
+distance_nm <- function(lat1, lon1, lat2, lon2) {
+  rad <- pi / 180
+  dlat <- (lat2 - lat1) * rad
+  dlon <- (lon2 - lon1) * rad
+  a <- sin(dlat / 2)^2 + cos(lat1 * rad) * cos(lat2 * rad) * sin(dlon / 2)^2
+  3440.065 * 2 * atan2(sqrt(a), sqrt(1 - a))
+}
+
+update_flight_history <- function(history, data, now = Sys.time()) {
+  data <- normalize_flights(data) |>
+    filter(!is.na(lat), !is.na(lon))
+
+  if (nrow(data) == 0) {
+    return(history)
+  }
+
+  data$key <- flight_key(data)
+  data$observed_at <- now
+
+  history |>
+    bind_rows(data) |>
+    filter(
+      as.numeric(difftime(now, observed_at, units = "secs")) <= history_ttl_secs
+    ) |>
+    arrange(key, observed_at) |>
+    distinct(key, observed_at, .keep_all = TRUE)
+}
+
 dedupe_flights <- function(data) {
   data <- normalize_flights(data)
 
@@ -200,8 +285,8 @@ fetch_point <- function(
     {
       res <- httr2::request(base_url) |>
         httr2::req_throttle(capacity = 60, fill_time_s = 60) |>
-        httr2::req_timeout(8) |>
-        httr2::req_retry(max_tries = 3)
+        httr2::req_timeout(3) |>
+        httr2::req_retry(max_tries = 1)
 
       if (identical(path_style, "point")) {
         res <- res |>
@@ -328,6 +413,15 @@ fetch_pooled_point <- function(lat, lon, radius, providers = names(adsb_provider
     failed_results,
     \(x, provider) paste0(provider, ": ", x$status$message)
   )
+  provider_health <- purrr::imap_dfr(results, \(x, provider) {
+    tibble(
+      provider = provider,
+      ok = isTRUE(x$status$ok),
+      rows = x$status$rows %||% 0,
+      message = x$status$message %||% "No error",
+      from_cache = isTRUE(x$status$from_cache)
+    )
+  })
 
   list(
     data = data,
@@ -345,6 +439,7 @@ fetch_pooled_point <- function(lat, lon, radius, providers = names(adsb_provider
       provider_count = length(providers),
       providers_ok = length(ok_results),
       providers_failed = length(failed_results),
+      provider_health = provider_health,
       updated_at = Sys.time(),
       url = paste(purrr::map_chr(results, \(x) x$status$url), collapse = " | "),
       from_cache = all(purrr::map_lgl(results, \(x) isTRUE(x$status$from_cache)))
@@ -444,6 +539,50 @@ aircraft_label <- function(flight, r, t, alt_baro, gs) {
   )
 }
 
+category_labels <- c(
+  A0 = "Categoria A0",
+  A1 = "Leves",
+  A2 = "Pequenas",
+  A3 = "Médias",
+  A4 = "Pesadas",
+  A5 = "Alta performance",
+  A6 = "Rotorcraft",
+  A7 = "Helicópteros"
+)
+
+category_label <- function(category) {
+  value <- category_labels[[category]]
+  if (is.null(value)) paste("Aeronaves", category) else value
+}
+
+selected_aircraft_card <- function(data, key) {
+  data <- normalize_flights(data)
+  data$key <- flight_key(data)
+  aircraft <- data |>
+    filter(key == !!key) |>
+    slice_head(n = 1)
+
+  if (nrow(aircraft) == 0) {
+    return(tags$div(class = "aircraft-details empty", "Selecione uma aeronave no mapa."))
+  }
+
+  row <- aircraft[1, ]
+  tags$div(
+    class = "aircraft-details",
+    tags$div(class = "details-title", display_value(row$flight)),
+    tags$div(class = "details-grid",
+      tags$span("Registro"), tags$strong(display_value(row$r)),
+      tags$span("Tipo"), tags$strong(display_value(row$t)),
+      tags$span("Categoria"), tags$strong(category_label(row$category)),
+      tags$span("Altitude"), tags$strong(paste0(display_value(row$alt_baro), " ft")),
+      tags$span("Velocidade"), tags$strong(paste0(display_value(row$gs), " kt")),
+      tags$span("Squawk"), tags$strong(display_value(row$squawk)),
+      tags$span("Fontes"), tags$strong(display_value(row$sources)),
+      tags$span("Última posição"), tags$strong(paste0(display_value(row$seen_pos), " s"))
+    )
+  )
+}
+
 add_aircraft_markers <- function(map, data, icon, group) {
   aircraft <- data |>
     filter(!is.na(lat), !is.na(lon))
@@ -452,11 +591,14 @@ add_aircraft_markers <- function(map, data, icon, group) {
     return(map)
   }
 
+  aircraft$marker_id <- flight_key(aircraft)
+
   map |>
     addMarkers(
       data = aircraft,
       lng = ~lon,
       lat = ~lat,
+      layerId = ~marker_id,
       label = ~ aircraft_label(flight, r, t, alt_baro, gs),
       icon = icon,
       options = markerOptions(
@@ -465,6 +607,62 @@ add_aircraft_markers <- function(map, data, icon, group) {
       ),
       group = group
     )
+}
+
+add_helicopter_halos <- function(map, data) {
+  helicopters <- data |>
+    filter(category == "A7", !is.na(lat), !is.na(lon))
+
+  if (nrow(helicopters) == 0) {
+    return(map)
+  }
+
+  map |>
+    addCircleMarkers(
+      data = helicopters,
+      lng = ~lon,
+      lat = ~lat,
+      radius = 13,
+      color = "#f97316",
+      weight = 3,
+      opacity = 0.95,
+      fillColor = "#fed7aa",
+      fillOpacity = 0.2,
+      group = "Helicópteros"
+    )
+}
+
+add_flight_trails <- function(map, history, visible_keys) {
+  history <- history |>
+    filter(key %in% visible_keys, !is.na(lat), !is.na(lon)) |>
+    arrange(key, observed_at)
+
+  trail_keys <- history |>
+    count(key, name = "points") |>
+    filter(points > 1) |>
+    pull(key)
+
+  if (length(trail_keys) == 0) {
+    return(map)
+  }
+
+  for (key in trail_keys) {
+    trail <- history |>
+      filter(key == !!key)
+    is_heli <- any(trail$category == "A7", na.rm = TRUE)
+    map <- map |>
+      addPolylines(
+        data = trail,
+        lng = ~lon,
+        lat = ~lat,
+        color = if (is_heli) "#f97316" else "#2563eb",
+        weight = if (is_heli) 4 else 2,
+        opacity = if (is_heli) 0.85 else 0.55,
+        group = "Trilhas"
+      )
+  }
+
+  map
 }
 
 poligono_presal <- data.frame(
@@ -568,7 +766,7 @@ registerPlugin <- function(map, plugin) {
 
 aircraft_icon <- function(filename) {
   makeIcon(
-    iconUrl = file.path("www", filename),
+    iconUrl = filename,
     iconWidth = 24,
     iconHeight = 14,
     iconAnchorX = 23,
@@ -591,15 +789,16 @@ other_aircraft_icon <- aircraft_icon("uparrow.png")
 
 aircraft_groups <- c(
   "Helicópteros",
-  paste("Aeronaves", setdiff(names(aircraft_icons), "A7")),
-  "Outras"
+  unname(category_labels[setdiff(names(aircraft_icons), "A7")]),
+  "Outras",
+  "Trilhas"
 )
 
 aircraft_group_name <- function(category) {
   if (identical(category, "A7")) {
     "Helicópteros"
   } else {
-    paste("Aeronaves", category)
+    category_label(category)
   }
 }
 
@@ -682,6 +881,63 @@ ui <- page_sidebar(
         line-height: 1.15;
         margin-top: 0.16rem;
       }
+      .provider-health {
+        display: grid;
+        gap: 0.35rem;
+        margin-bottom: 0.65rem;
+      }
+      .provider-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        color: #475569;
+        font-size: 0.78rem;
+        padding-bottom: 0.25rem;
+      }
+      .provider-row strong {
+        color: #111827;
+        font-weight: 650;
+      }
+      .provider-ok {
+        color: #047857;
+      }
+      .provider-fail {
+        color: #b91c1c;
+      }
+      .aircraft-details {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 8px;
+        background: #ffffff;
+        margin-bottom: 0.65rem;
+        padding: 0.7rem;
+      }
+      .aircraft-details.empty {
+        color: #64748b;
+        font-size: 0.86rem;
+      }
+      .details-title {
+        color: #111827;
+        font-size: 1rem;
+        font-weight: 750;
+        margin-bottom: 0.45rem;
+      }
+      .details-grid {
+        display: grid;
+        grid-template-columns: minmax(5.5rem, auto) minmax(0, 1fr);
+        gap: 0.25rem 0.65rem;
+        font-size: 0.82rem;
+      }
+      .details-grid span {
+        color: #64748b;
+      }
+      .details-grid strong {
+        color: #1f2937;
+        font-weight: 650;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
       .map-card .card-body {
         height: calc(100vh - 220px);
         min-height: 520px;
@@ -703,6 +959,9 @@ ui <- page_sidebar(
         .mobile-table {
           display: block;
         }
+        .summary-strip {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
       }
     "
     ))
@@ -722,7 +981,7 @@ ui <- page_sidebar(
       "Raio (nm)",
       min = 10,
       max = 250,
-      value = 50,
+      value = 100,
       step = 5
     ),
     checkboxInput(
@@ -737,30 +996,30 @@ ui <- page_sidebar(
       audio_row("120.6 APP-RJ Leste", "https://securestreams.autopo.st:2627/app_rj_leste")
     )
   ),
-  page_fillable(
-    layout_columns(
-      card(
-        class = "map-card",
-        full_screen = TRUE,
-        card_header("ADS-B"),
-        card_body(
-          fillable = TRUE, # Allows the map to fill the card
-          padding = 0, # Removes white border around the map
-          leafletOutput("map", height = "100%")
-        )
-      ),
-      card(
-        full_screen = TRUE,
-        card_header("Voos"),
-        card_body(
-          uiOutput("traffic_summary"),
-          textOutput("api_status"),
-          tags$div(class = "desktop-table", DTOutput(outputId = "flights_table")),
-          tags$div(class = "mobile-table", DTOutput(outputId = "flights_table_mobile"))
-        )
-      ),
-      col_widths = c(8, 4)
-    )
+  layout_columns(
+    card(
+      class = "map-card",
+      full_screen = TRUE,
+      card_header("ADS-B"),
+      card_body(
+        fillable = TRUE, # Allows the map to fill the card
+        padding = 0, # Removes white border around the map
+        leafletOutput("map", height = "100%")
+      )
+    ),
+    card(
+      full_screen = TRUE,
+      card_header("Voos"),
+      card_body(
+        uiOutput("traffic_summary"),
+        textOutput("api_status"),
+        uiOutput("provider_health"),
+        uiOutput("selected_aircraft"),
+        tags$div(class = "desktop-table", DTOutput(outputId = "flights_table")),
+        tags$div(class = "mobile-table", DTOutput(outputId = "flights_table_mobile"))
+      )
+    ),
+    col_widths = c(8, 4)
   )
 )
 
